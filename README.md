@@ -6,18 +6,17 @@
 
 ## last update: July 23, 2023
 
-# DISCLAIMER & CONTEXT 🧑‍💼⚠️
+# DISCLAIMER & CONTEXT , PLEASE READ BEFORE ANYTHING🧑‍💼⚠️
 
-This audit is not profesional! It was created to gain experience and for educational purposes. 😸
+This audit is not profesional! It was **created to gain experience and for educational purposes**. 😸
+
+The audit could be more complete, it **has analysis errors and mistaken conclusions**. It was made quickly and with a **time limit** to help me **simulate the audting process** and gain experience on the steps needed to audit a code.
 
 Specifically I did it to get more familiariazed with this code:
 
 [🔗 foundry-defi-stablecoin-f23](https://github.com/Cyfrin/foundry-defi-stablecoin-f23/tree/main#deployment-to-a-testnet-or-mainnet)
 
-I set myself a time limit on top, thats why it's not complete yet, uncompleted parts of the audit are marked.
-
-The time limit aimed to simulate a more realistic working enviroment. The deadline date was set to the beginning of the first auditing
-contest from [🦅CodeHawks🦅](https://www.codehawks.com/).
+The time limit aimed to simulate a more realistic working enviroment. The deadline date was set to the beginning of the first auditing contest from [🦅CodeHawks🦅](https://www.codehawks.com/).
 
 By the way `auditExercise.md` is a "false positive error" I thought the code had but it actually didnt. It's an exercise for you if you want to try to figure out why the things written there are actually wrong. Answers to this are at the end of the same file though.
 
@@ -199,12 +198,14 @@ function _calculateHealthFactor(uint256 totalDscMinted, uint256 collateralValueI
 # Low
 
 ## Potential for Reentrancy
-- **DSCENGINE - Line 289**: 
+
+- **DSCENGINE - Line 289**:
   - Ensure that `i_dsc` will always be valid. Given that it's set in the constructor and is immutable, this is a reasonable assumption.
   - However, if there's ever a concern, consider adding a non-reentrant modifier here as an added security measure.
 
 ## Solidity Version Recommendations
-- Slither recommends using Solidity version `0.8.18` for deployments. 
+
+- Slither recommends using Solidity version `0.8.18` for deployments.
   - Although using `0.8.19` should be okay if all tests are passing. It's a safer approach to use a version that has been exposed more to real-life enviroments.s
 
 # Informational
@@ -212,23 +213,28 @@ function _calculateHealthFactor(uint256 totalDscMinted, uint256 collateralValueI
 ## Documentation Improvements
 
 ### NatSpec Comments
-- Ensure to use the correct NatSpec format. 
+
+- Ensure to use the correct NatSpec format.
   - Correct format: `/** --Comments-- */`
   - Found in provided contracts: `/* --Comments-- */`
 
 ### Orthographic Corrections
+
 - File: `./src/DecentralizedStableCoin.sol`
   - Line 3: Change "volitility" to "volatility".
 
 ## Code Style Recommendations
 
 ### DSCEngine.sol
+
 - **Line 244**: Consider using `!minted` directly for better code readability.
 
 ### Naming Conventions
+
 - Your project uses clear naming conventions, which are easy to follow. However, if your project is intended to be used beyond your team, it's advisable to adhere to standard Solidity naming conventions.
 
 ### OracleLibTests.t.sol
+
 - **Line 26**: It appears there's a redundant comment. If the code accomplishes what the comment describes, consider removing the comment for cleaner code.
 
 # External Dependencies
@@ -243,28 +249,30 @@ Friendly reminder that wBTC could rely on trusted bridges. If the priority is tr
 
 ### `DeployDSC.s.sol`
 
-- **Line 29**: 
+- **Line 29**:
   - When creating staging tests, it's advisable to wait for some blocks before further interactions. This ensures all your transactions are successfully processed.
   - Ensure the deployer's address in staging environments is properly funded.
 
 ## Test Analysis
 
 ### `OracleLibTest.t.sol`
+
 - Improve the testing for the `staleCheckLatestRoundData()` function:
   - Implement fuzz testing on it.
   - Design different unit tests where the `if` conditions on lines 28 and 32 (from `OracleLib.sol`) experience different boolean states.
 
 ### `DSCEngineTest.t.sol`
 
-- **Line 50, answer to the question in a comment: Should we put our integration tests here**: 
+- **Line 50, answer to the question in a comment: Should we put our integration tests here**:
+
   - For improved code organization, it's recommended to create a separate folder at the same directory level as unit tests, named `integration tests`. Within unit tests, focus solely on evaluating individual smart contract functions in isolation.
 
-- **Lines 63, 64**: 
+- **Lines 63, 64**:
+
   - ERC20 MOCKS might not be deployed in Sepolia. If this is the case, these lines should be included inside the Anvil chain ID conditional.
 
-- **Line 174**: 
+- **Line 174**:
   - Another mock is being used here. I assume that unit tests are not be designed to run on Sepolia. If they are intended to, ensure that the necessary mocks are deployed prior to test execution.
-
 
 ## New Invariant sugestions
 
@@ -325,9 +333,9 @@ test/mocks/MockFailedTransferFrom.sol
 
 # Refactors:
 
-- DecentralizedStableCoin.sol: Rvert Error DecentralizedStableCoin__MustBeMoreThanZero could me made modifier as it's used multiple times.
+- DecentralizedStableCoin.sol: Rvert Error DecentralizedStableCoin\_\_MustBeMoreThanZero could me made modifier as it's used multiple times.
 
-- DSCEngine.sol line 379: You could modularizes this part of the code with a getTokenPriceFromAggregator() for example. Found duplicated in lines 314,315. 
+- DSCEngine.sol line 379: You could modularizes this part of the code with a getTokenPriceFromAggregator() for example. Found duplicated in lines 314,315.
 
 ## Tests refactor
 
@@ -394,7 +402,7 @@ The following changes are unnecessary checks that can be deleted to save gas, de
 
   - Lines 60-62:
     The following code is unnecessary as `super.burn(_amount)` eventually triggers
-    ERC20._burn(address, amount) from OpenZeppelin. This function already includes
+    ERC20.\_burn(address, amount) from OpenZeppelin. This function already includes
     a revert for this condition. As a result, the error message defined on line 43 can be removed.
 
   - Lines 67-72: Those checks are already made or by the `\_mint` function
